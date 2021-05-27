@@ -53,7 +53,7 @@ public class ApacheStrus2S2005 implements IModule {
                 IHttpRequestResponse checkRequestResponse = callbacks.makeHttpRequest(baseRequestResponse.getHttpService(),
                         newMessage);
 
-                stderr.println(newURL.toString()); //debug message
+                //stderr.println(newURL.toString()); //debug message
                 List<IBurpCollaboratorInteraction> collaboratorInteractions = collaboratorContext.fetchCollaboratorInteractionsFor(currentCollaboratorPayload);
 
                 if (!collaboratorInteractions.isEmpty()) {
