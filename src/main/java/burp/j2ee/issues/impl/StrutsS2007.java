@@ -19,10 +19,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.io.PrintWriter;
 
-public class ApacheStrutsS2007 implements IModule {
+public class StrutsS2007 implements IModule {
 
     private static final String TITLE = "Apache Struts S2-007 Remote Code Execution";
-    private static final String DESCRIPTION = "J2EEscan identified RCE in the webpage"
+    private static final String DESCRIPTION = "J2EEscan identified  S2-007 RCE in the webpage"
             + "<b>References</b>:<br /><br />"
             + "http://struts.apache.org/docs/s2-007.html<br />"
             + "https://github.com/vulhub/vulhub/tree/master/struts2/s2-007<br />"
@@ -61,18 +61,16 @@ public class ApacheStrutsS2007 implements IModule {
                 Matcher matcher = xincludeMatcher.matcher(response);
 
                 if (matcher.find()) {
-
                     issues.add(new CustomScanIssue(
                             baseRequestResponse.getHttpService(),
-                            reqInfo.getUrl(),
+                            helpers.analyzeRequest(baseRequestResponse).getUrl(),
                             checkRequestResponse,
                             TITLE,
                             DESCRIPTION,
                             REMEDY,
                             Risk.High,
-                            Confidence.Certain
+                            Confidence.Firm
                     ));
-
                     return issues;
                 }
             }

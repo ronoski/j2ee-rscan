@@ -108,7 +108,7 @@ public class SpringWebFlowDataBindExpressionCVE20174971 implements IModule {
                     DESCRIPTION,
                     REMEDY,
                     Risk.High,
-                    Confidence.Certain
+                    Confidence.Firm
             ));
         }
 

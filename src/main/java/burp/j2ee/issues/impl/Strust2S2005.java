@@ -11,9 +11,9 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ApacheStrus2S2005 implements IModule {
+public class Strust2S2005 implements IModule {
     private static final String TITLE = "Apache Struts S2-005 Remote Code Execution (OOB)";
-    private static final String DESCRIPTION = "J2EEscan identified RCE in the webpage"
+    private static final String DESCRIPTION = "J2EEscan identified Struts S2-005  RCE in the webpage"
             + "<b>References</b>:<br /><br />"
             + "http://struts.apache.org/docs/s2-005.html<br />"
             + "https://github.com/vulhub/vulhub/tree/master/struts2/s2-005<br />"
@@ -59,14 +59,16 @@ public class ApacheStrus2S2005 implements IModule {
                 if (!collaboratorInteractions.isEmpty()) {
                     issues.add(new CustomScanIssue(
                             baseRequestResponse.getHttpService(),
-                            reqInfo.getUrl(),
+                            helpers.analyzeRequest(baseRequestResponse).getUrl(),
                             checkRequestResponse,
                             TITLE,
                             DESCRIPTION,
                             REMEDY,
                             Risk.High,
-                            Confidence.Certain
+                            Confidence.Firm
                     ));
+                    return issues;
+
                 }
             }catch (MalformedURLException ex) {
                 stderr.println("Error creating URL " + ex.getMessage());

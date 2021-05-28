@@ -137,7 +137,7 @@ public class SpringBootActuator implements IModule {
                                            DESCRIPTION,
                                            REMEDY,
                                            Risk.Low,
-                                           Confidence.Certain
+                                           Confidence.Firm
                                    ));
                                }
                     }

